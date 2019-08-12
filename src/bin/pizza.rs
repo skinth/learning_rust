@@ -1,4 +1,5 @@
 //the file itself acts as a module: no need to mod declaration!
+#[derive(Clone)]
 struct Pizza {
     name: String,
     price: f64
@@ -23,14 +24,29 @@ impl Pizza {
 
 trait Pizzable {
     fn get_price(&self) -> f64;
+    fn description(&self) -> String;
+    fn box_clone(&self) -> Box<Pizzable>;
+}
+
+impl Clone for Box<Pizzable> {
+    fn clone(&self) -> Box<Pizzable> {
+        self.box_clone()
+    }
 }
 
 impl Pizzable for Pizza {
     fn get_price(&self) -> f64 {
         self.price
     }
+    fn description(&self) -> String {
+        format!("{} {}", self.name, self.get_price())
+    }
+    fn box_clone(&self) -> Box<Pizzable> {
+        Box::new((*self).clone())
+    }
 }
 
+#[derive(Clone)]
 struct PizzaWithAddon {
     name_addon: String,
     pizza: Pizza,
@@ -52,8 +68,15 @@ impl Pizzable for PizzaWithAddon {
     fn get_price(&self) -> f64 {
         self.pizza.get_price() + 0.50
     }
+    fn description(&self) -> String {
+        format!("{} with {} {}", self.pizza.name, self.name_addon, self.get_price())
+    }
+    fn box_clone(&self) -> Box<Pizzable> {
+        Box::new((*self).clone())
+    }
 }
 
+#[derive(Clone)]
 struct Basket {
     pizzas: Vec<Box<Pizzable>>
 }
@@ -73,10 +96,12 @@ impl Summable for Basket {
 }
 
 fn print_basket(basket: Basket) {
+    let copy_b = basket.clone();
     println!("Basket------------");
-    for pizza in basket.pizzas {
-        println!("");
+    for pizza in copy_b.pizzas {
+        println!("{}",pizza.description());
     }
+    //println!("Total Cost {}", copy_b.get_sum());
 }
 
 fn list_of_pizzas() {
@@ -91,5 +116,6 @@ fn main() {
     };
     bask.pizzas.push(Box::new(pm));
     bask.pizzas.push(Box::new(pa));
-    println!("{}", bask.get_sum());
+    //println!("{}", bask.get_sum());
+    print_basket(bask);
 }
