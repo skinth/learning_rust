@@ -1,3 +1,4 @@
+use std::io;
 //the file itself acts as a module: no need to mod declaration!
 struct Pizza {
     name: String,
@@ -35,16 +36,35 @@ fn print_basket(basket: &Vec<Pizza>) {
     println!("Total Cost {}", tot);
 }
 
-fn list_of_pizzas() {
+fn list_of_pizzas(pizzas: &Vec<Pizza>) -> usize{
+    println!("Please select a pizza to add to your basket:");
+    let mut ix = 1;
+    for pizza in pizzas {
+        println!("{}: {}: {}", ix, pizza.name, pizza.price);
+        ix = ix + 1;
+    }
 
+    let mut word = String::new();
+    print!("Enter your choice here: \n");
+    std::io::stdin().read_line(&mut word).expect("Failed to read the number!");
+    let choice: usize = match word.trim().parse() {
+        Ok(i) => i,
+        Err(e) => 0,
+    };
+    choice
 }
 
 fn main() {
+    let mut list: Vec<Pizza> = Vec::new();
     let pm = Pizza::new("Margherita".to_string(), 6.10);
     let pa = Pizza::new("Diavola".to_string(), 8.34);
+    list.push(pm);
+    list.push(pa);
     let mut bask: Vec<Pizza> = Vec::new();
-    bask.push(pm);
-    bask.push(pa);
-    //println!("{}", bask.get_sum());
-    print_basket(&bask);
+    let mut a: usize = 1;
+    while(a != 0) {
+        a = list_of_pizzas(&list);
+        print_basket(&bask);
+        println!("{}", a);
+    }
 }
